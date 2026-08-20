@@ -51,7 +51,9 @@ class GeneticMap:
         gene_data = self.gene_info[gene_order]
         genotype_trait_map = gene_data.get("genotype_trait_map", {})
 
-        normalized_genotype = tuple(sorted(genotype, reverse=True))
+        # 标准化基因型（排序，使 Aa 和 aA 视为相同）
+        # 注意：不使用 reverse=True，以保证大写字母在前（与字典键一致）
+        normalized_genotype = tuple(sorted(genotype))
 
         return genotype_trait_map.get(normalized_genotype)
 
@@ -131,7 +133,8 @@ class GeneticMap:
         """
         获取基因在染色体上的位置
         """
-        genotype_str = "".join(sorted(genotype, reverse=True))
+        # 统一排序，不使用 reverse=True
+        genotype_str = "".join(sorted(genotype))
         return self.gene_locations.get((gene_order, genotype_str), self.AUTOSOME)
 
     def cross_single_gene(self, parent1_genotype, parent2_genotype):
@@ -146,7 +149,8 @@ class GeneticMap:
 
         for g1 in gametes1:
             for g2 in gametes2:
-                genotype = tuple(sorted([g1, g2], reverse=True))
+                # 标准化基因型，不使用 reverse=True
+                genotype = tuple(sorted([g1, g2]))
                 offspring[genotype] = offspring.get(genotype, 0) + 1
 
         for genotype in offspring:
@@ -235,7 +239,8 @@ class GeneticMap:
                 for i in range(gene_count):
                     allele1 = gamete1[i]
                     allele2 = gamete2[i]
-                    genotype = tuple(sorted([allele1, allele2], reverse=True))
+                    # 标准化基因型，不使用 reverse=True
+                    genotype = tuple(sorted([allele1, allele2]))
                     genotype_list.append(genotype)
 
                 genotype_tuple = tuple(genotype_list)
@@ -385,11 +390,12 @@ class Individual:
 
 if __name__ == "__main__":
     # 创建遗传图谱：两对基因
+    # 修复：补充了 ("A", "A") 的定义，删除了重复的 ("A", "a")
     gene_info = {
         1: {
             "alleles": ["A", "a"],
             "genotype_trait_map": {
-                ("A", "a"): {"dominance": GeneticMap.DOMINANT, "trait": "宽叶"},
+                ("A", "A"): {"dominance": GeneticMap.DOMINANT, "trait": "宽叶"},
                 ("A", "a"): {"dominance": GeneticMap.DOMINANT, "trait": "宽叶"},
                 ("a", "a"): {"dominance": GeneticMap.RECESSIVE, "trait": "窄叶"}
             }
